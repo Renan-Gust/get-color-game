@@ -1,0 +1,69 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: url("https://rare-gallery.com/uploads/posts/122438-mountains-gradient-foggy-hd.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.container{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.tube{
+    height: 215px;
+    width: 50px;
+    border-bottom-left-radius: 90px;
+    border-bottom-right-radius: 90px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    position: relative;
+
+    background: rgba( 255, 255, 255, 0.1 );
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+/* .tube::before{
+    content: "";
+    width: 115%;
+    height: 9px;
+
+    top: -8px;
+    left: -3px;
+    position: absolute;
+
+    border-radius: 100%;
+    background-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+} */
+
+.tube.selected{
+    scale: 1.2;
+}
+
+.tube .color{
+    width: 100%;
+    height: calc(200px / 5);
+}
+
+.tube .color:first-child{
+    /* border-top-left-radius: 12px;
+    border-top-right-radius: 12px; */
+}
+
+.tube .color:last-child{
+    border-bottom-left-radius: 90px;
+    border-bottom-right-radius: 90px;
+}
