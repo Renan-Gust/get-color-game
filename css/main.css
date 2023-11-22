@@ -2,6 +2,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+    font-family: 'Quicksand', sans-serif;
 }
 
 body{
@@ -13,6 +15,42 @@ body{
 
 .container{
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.info{
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.info h1{
+    display: flex;
+    align-items: center;
+    font-size: 5rem;
+    color: #FFF;
+}
+
+.info button{
+    outline: none;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 0;
+    height: 40px;
+    width: 40px;
+    background-image: linear-gradient(to right, #DA22FF 0%, #9733EE  100%);
+    color: #FFF;
+}
+
+.info button svg{
+    width: 25px;
+}
+
+.container .tubes{
     display: flex;
     justify-content: center;
     align-items: center;

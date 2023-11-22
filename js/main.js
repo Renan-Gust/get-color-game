@@ -1,13 +1,13 @@
 class GetColorGame {
-    container = document.querySelector(".container");
+    containerTubes = document.querySelector(".container .tubes");
     colors = ["red", "yellow", "blue", "green", "purple"];
     numberOfColorsToFill = 5;
     tubes = this.colors.length;
-    extraTubes = 2;
     selectedColor = null;
     nextSelectedColor = null;
     tubesElement = null;
     tubeSelectedClass = "selected";
+    currentLevel = null;
 
     ReturnColorsByTube(index){
         const colors = [];
@@ -52,13 +52,11 @@ class GetColorGame {
     }
 
     fillTubes(){
-        const allColors = this.separateTheRandomColors(this.groupRandomColors());
-
         for (let i = 0; i < this.tubes; i++) {
             const tube = document.createElement("div");
             tube.className = "tube";
 
-            const randomColors = allColors[i];
+            const randomColors = this.currentLevel.allColors[i];
         
             for (let j = 0; j < this.numberOfColorsToFill; j++) {
                 const colorDiv = document.createElement("div");
@@ -67,19 +65,19 @@ class GetColorGame {
                 tube.appendChild(colorDiv);
             }
         
-            this.container.appendChild(tube);
+            this.containerTubes.appendChild(tube);
         }
     }
 
     fillExtraTubes(){
-        for (let i = 0; i < this.extraTubes; i++) {
+        for (let i = 0; i < this.currentLevel.extraTubes; i++) {
             const emptyTube = document.createElement("div");
             emptyTube.className = "tube";
-            this.container.appendChild(emptyTube);
+            this.containerTubes.appendChild(emptyTube);
         }        
     }
 
-    moveColor(tube){
+    selectColor(tube){
         const colors = tube.querySelectorAll(".color");
 
         if (colors.length > 0 && !this.selectedColor) {
@@ -98,36 +96,88 @@ class GetColorGame {
                 }
             }
         } else if (colors.length < 5 && this.selectedColor) {
-            tube.insertBefore(this.selectedColor, tube.firstChild);
-            this.selectedColor = null;
+            if(colors.length === 0){
+                this.transferColor(tube);
+            } else{
+                const selectedColorName = this.selectedColor.getAttribute("data-color");
+                const firstColorOfTheTubeReceivingTheTransfer = colors[0].getAttribute("data-color");
 
-            if(this.nextSelectedColor){
-                tube.insertBefore(this.nextSelectedColor, tube.firstChild);
-                this.nextSelectedColor = null;
+                if(selectedColorName === firstColorOfTheTubeReceivingTheTransfer){
+                    this.transferColor(tube);
+                }
             }
-
-            this.deselectTube();
         } else if(this.selectedColor && tube.classList.contains(this.tubeSelectedClass)){
             tube.classList.remove(this.tubeSelectedClass);
             this.selectedColor = null;
         }
     }
 
+    transferColor(tube){
+        tube.insertBefore(this.selectedColor, tube.firstChild);
+        this.selectedColor = null;
+
+        if(this.nextSelectedColor){
+            tube.insertBefore(this.nextSelectedColor, tube.firstChild);
+            this.nextSelectedColor = null;
+        }
+
+        this.deselectTube();
+    }
+
     deselectTube(){
         this.tubesElement.forEach(tube => tube.classList.remove(this.tubeSelectedClass));
     }
 
+    getCurrentLevel(){
+        this.currentLevel = JSON.parse(localStorage.getItem("getColorGame"));
+
+        if(this.currentLevel){
+            this.fillTubes();
+            this.fillExtraTubes();
+        } else{
+            const allColors = this.separateTheRandomColors(this.groupRandomColors());
+            console.log(allColors);
+            const info = {
+                level: 1,
+                allColors,
+                extraTubes: 2
+            };
+
+            this.currentLevel = localStorage.setItem("getColorGame", JSON.stringify(info));
+            
+            this.fillTubes();
+            this.fillExtraTubes();
+        }
+    }
+
+    showLevel(){
+        const levelElement = document.querySelector(".container .info h1");
+        levelElement.textContent = `Level ${this.currentLevel.level}`;
+    }
+
+    refresh(){
+        this.containerTubes.innerHTML = "";
+        this.init();
+    }
+
     init(){
-        this.fillTubes();
-        this.fillExtraTubes();
+        this.getCurrentLevel();
 
         this.tubesElement = document.querySelectorAll(".tube");
 
         this.tubesElement.forEach((tube) => {
-            tube.addEventListener("click", () => this.moveColor(tube));
+            tube.addEventListener("click", () => this.selectColor(tube));
         });
     }
 }
 
-const initGame = new GetColorGame();
-initGame.init();
+const game = new GetColorGame();
+game.init();
+
+const refreshButton = document.querySelector("button.refresh");
+refreshButton.addEventListener("click", () => game.refresh());
+
+// Avançar o Level
+// Randomizar as quantidades de tubos a cada Level
+// Adicionar confetes quando completar um tubo
+// Criar PWA
