@@ -3,16 +3,18 @@ class GetColorGame {
     colors = ["red", "yellow", "blue", "green", "purple"];
     numberOfColorsToFill = 5;
     tubes = this.colors.length;
+    extraTubes = 2;
     selectedColor = null;
     nextSelectedColor = null;
     tubesElement = null;
     tubeSelectedClass = "selected";
     currentLevel = null;
+    passedTheLevel = false;
 
     ReturnColorsByTube(index){
         const colors = [];
 
-        for(let i = 0; i < 5; i++){
+        for(let i = 0; i < this.numberOfColorsToFill; i++){
             colors.push(this.colors[index])
         }
 
@@ -33,8 +35,8 @@ class GetColorGame {
         const shuffledColors = this.shuffleColors(groupedColors);
 
         const separateTheColorsArray = [];
-        for (let i = 0; i < shuffledColors.length; i += 5) {
-            separateTheColorsArray.push(shuffledColors.slice(i, i + 5));
+        for (let i = 0; i < shuffledColors.length; i += this.numberOfColorsToFill) {
+            separateTheColorsArray.push(shuffledColors.slice(i, i + this.numberOfColorsToFill));
         }
 
         return separateTheColorsArray;
@@ -95,7 +97,7 @@ class GetColorGame {
                     this.nextSelectedColor = nextColor;
                 }
             }
-        } else if (colors.length < 5 && this.selectedColor) {
+        } else if (colors.length < this.numberOfColorsToFill && this.selectedColor) {
             if(colors.length === 0){
                 this.transferColor(tube);
             } else{
@@ -122,32 +124,37 @@ class GetColorGame {
         }
 
         this.deselectTube();
+        this.checkIfPassedTheLevel();
     }
 
     deselectTube(){
         this.tubesElement.forEach(tube => tube.classList.remove(this.tubeSelectedClass));
     }
 
-    getCurrentLevel(){
+    generateLevel(){
         this.currentLevel = JSON.parse(localStorage.getItem("getColorGame"));
+        const allColors = this.separateTheRandomColors(this.groupRandomColors());
 
-        if(this.currentLevel){
-            this.fillTubes();
-            this.fillExtraTubes();
-        } else{
-            const allColors = this.separateTheRandomColors(this.groupRandomColors());
-            console.log(allColors);
-            const info = {
-                level: 1,
-                allColors,
-                extraTubes: 2
-            };
+        const info = {
+            allColors,
+            extraTubes: this.extraTubes
+        };
 
-            this.currentLevel = localStorage.setItem("getColorGame", JSON.stringify(info));
-            
-            this.fillTubes();
-            this.fillExtraTubes();
+        if(!this.currentLevel){
+            info.level = 1;
         }
+
+        if(this.passedTheLevel){
+            info.level = this.currentLevel.level + 1;
+            this.refresh();
+        }
+
+        this.currentLevel = localStorage.setItem("getColorGame", JSON.stringify(info)); 
+
+        this.fillTubes();
+        this.fillExtraTubes();
+
+        this.passedTheLevel = false;
     }
 
     showLevel(){
@@ -160,8 +167,34 @@ class GetColorGame {
         this.init();
     }
 
+    checkIfPassedTheLevel(){
+        const tubes = this.containerTubes.querySelectorAll(".tube");
+        let totalFilledColors = 0;
+
+        tubes.forEach((tube) => {
+            const colors = tube.querySelectorAll(".color");
+
+            if(colors.length === this.numberOfColorsToFill){
+                const lastColorFilled = colors[0].getAttribute("data-color");
+
+                colors.forEach((color) => {
+                    const colorFilled = color.getAttribute("data-color");
+
+                    if(colorFilled === lastColorFilled){
+                        totalFilledColors++;
+                    }
+                });
+            }
+        });
+
+        if(totalFilledColors === this.tubes * this.numberOfColorsToFill){
+            this.passedTheLevel = true;
+            this.generateLevel();
+        }
+    }
+
     init(){
-        this.getCurrentLevel();
+        this.generateLevel();
 
         this.tubesElement = document.querySelectorAll(".tube");
 
