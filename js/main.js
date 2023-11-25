@@ -54,6 +54,8 @@ class GetColorGame {
     }
 
     fillTubes(){
+        this.containerTubes.innerHTML = "";
+
         for (let i = 0; i < this.tubes; i++) {
             const tube = document.createElement("div");
             tube.className = "tube";
@@ -133,38 +135,39 @@ class GetColorGame {
 
     generateLevel(){
         this.currentLevel = JSON.parse(localStorage.getItem("getColorGame"));
+
+        if(!this.currentLevel){
+            this.saveLevel();
+        }
+
+        if(this.passedTheLevel){
+            this.saveLevel(true);
+
+            this.passedTheLevel = false;
+            this.init();
+        }
+
+        this.fillTubes();
+        this.fillExtraTubes();
+        this.showLevel();
+    }
+
+    saveLevel(firstLevel = false){
         const allColors = this.separateTheRandomColors(this.groupRandomColors());
 
         const info = {
+            level: firstLevel ? this.currentLevel.level + 1 : 1,
             allColors,
             extraTubes: this.extraTubes
         };
 
-        if(!this.currentLevel){
-            info.level = 1;
-        }
-
-        if(this.passedTheLevel){
-            info.level = this.currentLevel.level + 1;
-            this.refresh();
-        }
-
-        this.currentLevel = localStorage.setItem("getColorGame", JSON.stringify(info)); 
-
-        this.fillTubes();
-        this.fillExtraTubes();
-
-        this.passedTheLevel = false;
+        localStorage.setItem("getColorGame", JSON.stringify(info));
+        this.currentLevel = JSON.parse(localStorage.getItem("getColorGame"));
     }
 
     showLevel(){
         const levelElement = document.querySelector(".container .info h1");
         levelElement.textContent = `Level ${this.currentLevel.level}`;
-    }
-
-    refresh(){
-        this.containerTubes.innerHTML = "";
-        this.init();
     }
 
     checkIfPassedTheLevel(){
@@ -208,9 +211,8 @@ const game = new GetColorGame();
 game.init();
 
 const refreshButton = document.querySelector("button.refresh");
-refreshButton.addEventListener("click", () => game.refresh());
+refreshButton.addEventListener("click", () => game.init());
 
-// Avançar o Level
 // Randomizar as quantidades de tubos a cada Level
 // Adicionar confetes quando completar um tubo
 // Criar PWA
