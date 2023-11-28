@@ -1,20 +1,32 @@
 class GetColorGame {
     containerTubes = document.querySelector(".container .tubes");
-    colors = ["red", "yellow", "blue", "green", "purple"];
-    numberOfColorsToFill = 5;
-    tubes = this.colors.length;
-    extraTubes = 2;
+    extraTubes = 0;
     selectedColor = null;
     nextSelectedColor = null;
     tubesElement = null;
-    tubeSelectedClass = "selected";
     currentLevel = null;
     passedTheLevel = false;
+    numberColorsToFill = 5;
+    tubeSelectedClass = "selected";
+    allColors = ["red", "yellow", "blue", "green", "purple", "black", "pink", "white"];
+    colors = [];
+
+    constructor(){
+        this.extraTubes = 2;
+        this.randomAmountOfTubes();
+    }
+
+    randomAmountOfTubes(){
+        while(this.colors.length < 5){
+            const quantity = Math.round(Math.random() * this.allColors.length);
+            this.colors = this.allColors.slice(0, quantity);
+        }
+    }
 
     ReturnColorsByTube(index){
         const colors = [];
 
-        for(let i = 0; i < this.numberOfColorsToFill; i++){
+        for(let i = 0; i < this.numberColorsToFill; i++){
             colors.push(this.colors[index])
         }
 
@@ -35,8 +47,8 @@ class GetColorGame {
         const shuffledColors = this.shuffleColors(groupedColors);
 
         const separateTheColorsArray = [];
-        for (let i = 0; i < shuffledColors.length; i += this.numberOfColorsToFill) {
-            separateTheColorsArray.push(shuffledColors.slice(i, i + this.numberOfColorsToFill));
+        for (let i = 0; i < shuffledColors.length; i += this.numberColorsToFill) {
+            separateTheColorsArray.push(shuffledColors.slice(i, i + this.numberColorsToFill));
         }
 
         return separateTheColorsArray;
@@ -45,7 +57,7 @@ class GetColorGame {
     groupRandomColors() {
         const randomColorsGrouped = [];
 
-        for (let i = 0; i < this.tubes; i++) {
+        for (let i = 0; i < this.colors.length; i++) {
             const colors = this.ReturnColorsByTube(i);
             randomColorsGrouped.push(colors);
         }
@@ -56,13 +68,13 @@ class GetColorGame {
     fillTubes(){
         this.containerTubes.innerHTML = "";
 
-        for (let i = 0; i < this.tubes; i++) {
+        for (let i = 0; i < this.currentLevel.allColors.length; i++) {
             const tube = document.createElement("div");
             tube.className = "tube";
 
             const randomColors = this.currentLevel.allColors[i];
         
-            for (let j = 0; j < this.numberOfColorsToFill; j++) {
+            for (let j = 0; j < this.numberColorsToFill; j++) {
                 const colorDiv = document.createElement("div");
                 colorDiv.className = `color ${randomColors[j]}`;
                 colorDiv.setAttribute("data-color", randomColors[j]);
@@ -99,7 +111,7 @@ class GetColorGame {
                     this.nextSelectedColor = nextColor;
                 }
             }
-        } else if (colors.length < this.numberOfColorsToFill && this.selectedColor) {
+        } else if (colors.length < this.numberColorsToFill && this.selectedColor) {
             if(colors.length === 0){
                 this.transferColor(tube);
             } else{
@@ -153,6 +165,7 @@ class GetColorGame {
     }
 
     saveLevel(firstLevel = false){
+        this.randomAmountOfTubes();
         const allColors = this.separateTheRandomColors(this.groupRandomColors());
 
         const info = {
@@ -177,7 +190,7 @@ class GetColorGame {
         tubes.forEach((tube) => {
             const colors = tube.querySelectorAll(".color");
 
-            if(colors.length === this.numberOfColorsToFill){
+            if(colors.length === this.numberColorsToFill){
                 const lastColorFilled = colors[0].getAttribute("data-color");
 
                 colors.forEach((color) => {
@@ -190,7 +203,7 @@ class GetColorGame {
             }
         });
 
-        if(totalFilledColors === this.tubes * this.numberOfColorsToFill){
+        if(totalFilledColors === this.currentLevel.allColors.length * this.numberColorsToFill){
             this.passedTheLevel = true;
             this.generateLevel();
         }
@@ -213,6 +226,12 @@ game.init();
 const refreshButton = document.querySelector("button.refresh");
 refreshButton.addEventListener("click", () => game.init());
 
-// Randomizar as quantidades de tubos a cada Level
+// Ver se é possível completar o level com esses números
+// 5 - 1
+// 6 - 2
+// 7 - 2
+// 8 - 2
+
 // Adicionar confetes quando completar um tubo
+// Ta com um bug quando um tubo so pode receber +1, mas caso ele transfere duas cores de uma vez, transfere msm assim
 // Criar PWA
